@@ -1,7 +1,7 @@
 import HistoryPage from "./pages/HistoryPage.vue";
 import HomePage from "./pages/HomePage.vue";
 import QueuePage from "./pages/QueuePage.vue";
-import { createWebHistory, createRouter } from "vue-router";
+import { createWebHashHistory, createRouter } from "vue-router";
 
 const routes = [
 	{ path: "/", component: HomePage },
@@ -10,6 +10,6 @@ const routes = [
 ];
 
 export const router = createRouter({
-	history: createWebHistory(),
+	history: createWebHashHistory(),
 	routes,
 });
