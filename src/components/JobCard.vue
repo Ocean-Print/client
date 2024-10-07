@@ -1,0 +1,40 @@
+<script setup lang="ts">
+import type { JobPreview } from "@/api/job.api";
+import { Badge } from "@/components/ui/badge";
+import { computed } from "vue";
+
+const { job } = defineProps<{
+	job: JobPreview;
+}>();
+
+const printTime = computed(() => {
+	const hours = Math.floor(job.project.printTime / 60);
+	const minutes = job.project.printTime % 60;
+	return `${hours}:${minutes.toString().padStart(2, "0")}`;
+});
+</script>
+
+<template>
+	<div class="rounded-lg border bg-card text-card-foreground shadow-sm p-2">
+		<div class="flex flex-row gap-2 items-center">
+			<img
+				:src="`/assets/thumbnails/${job.project.hash}.png`"
+				class="w-16 h-16"
+			/>
+			<div class="flex flex-col gap-2">
+				<span class="text-xl h-8 w-full truncate">{{ job.project.name }}</span>
+				<div class="flex flex-row gap-2 h-8">
+					<Badge :variant="job.state === 'FAILED' ? 'destructive' : 'outline'">
+						{{ job.state }}
+					</Badge>
+					<Badge variant="outline">
+						{{ printTime }}
+					</Badge>
+				</div>
+				<div class="text-neutral-500 text-sm" v-if="job.endedAt">
+					Ended at {{ new Date(job.endedAt).toLocaleString() }}
+				</div>
+			</div>
+		</div>
+	</div>
+</template>

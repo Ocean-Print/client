@@ -1,0 +1,37 @@
+{
+	"name": "@ocean-print/client",
+	"private": true,
+	"version": "2.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vue-tsc -b && vite build",
+		"format": "prettier --write ."
+	},
+	"dependencies": {
+		"@tanstack/vue-table": "^8.20.5",
+		"@vueuse/core": "^11.1.0",
+		"class-variance-authority": "^0.7.0",
+		"clsx": "^2.1.1",
+		"lucide-vue-next": "^0.446.0",
+		"pinia": "^2.2.4",
+		"radix-vue": "^1.9.6",
+		"tailwind-merge": "^2.5.2",
+		"tailwindcss-animate": "^1.0.7",
+		"vue": "^3.4.37",
+		"vue-router": "^4.4.5"
+	},
+	"devDependencies": {
+		"@iconify-json/radix-icons": "^1.2.0",
+		"@iconify/vue": "^4.1.2",
+		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"@vitejs/plugin-vue": "^5.1.2",
+		"autoprefixer": "^10.4.20",
+		"prettier": "^3.3.3",
+		"tailwindcss": "^3.4.13",
+		"typescript": "^5.5.3",
+		"vite": "^5.4.1",
+		"vue-tsc": "^2.0.29"
+	},
+	"packageManager": "pnpm@9.7.1"
+}
