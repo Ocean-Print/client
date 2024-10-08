@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import type { JobPreview } from "@/api/job.api";
-import * as JobApi from "@/api/job.api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { computed } from "vue";
@@ -20,8 +17,8 @@ const { job } = defineProps<{
 const emits = defineEmits(["cancel", "setPriority"]);
 
 const printTime = computed(() => {
-	const hours = Math.floor(job.project.printTime / 60);
-	const minutes = job.project.printTime % 60;
+	const hours = Math.floor(job.project.printTime / 3600);
+	const minutes = Math.floor((job.project.printTime % 3600) / 60);
 	return `${hours}:${minutes.toString().padStart(2, "0")}`;
 });
 </script>
@@ -48,26 +45,22 @@ const printTime = computed(() => {
 					Ended at {{ new Date(job.endedAt).toLocaleString() }}
 				</div>
 			</div>
-			<DropdownMenu>
+			<DropdownMenu v-if="job.state === 'QUEUED'">
 				<DropdownMenuTrigger>
 					<Button variant="outline">Actions</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
 					<DropdownMenuItem
 						@click="emits('setPriority', 1)"
-						v-if="job.state === 'QUEUED' && job.priority === 0"
+						v-if="job.priority === 0"
 						>Prioritize</DropdownMenuItem
 					>
 					<DropdownMenuItem
 						@click="emits('setPriority', 0)"
-						v-if="job.state === 'QUEUED' && job.priority > 0"
+						v-if="job.priority > 0"
 						>Deprioritize</DropdownMenuItem
 					>
-					<DropdownMenuItem
-						@click="emits('cancel')"
-						v-if="job.state === 'QUEUED'"
-						>Cancel</DropdownMenuItem
-					>
+					<DropdownMenuItem @click="emits('cancel')">Cancel</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
