@@ -2,7 +2,7 @@
 import Button from "./ui/button/Button.vue";
 import Progress from "./ui/progress/Progress.vue";
 import type { PrinterPreview } from "@/api/printer.api";
-import PrinterErrorDialog from "@/components/PrinterErrorDialog.vue";
+import ErrorDialog from "@/components/ErrorDialog.vue";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -21,6 +21,7 @@ const { printer } = defineProps<{
 const emits = defineEmits(["clearPrinter"]);
 
 const showPrinterErrorDialog = ref(false);
+const showSystemErrorDialog = ref(false);
 
 const timeRemaining = computed(() => {
 	const hours = Math.floor(printer.printerStatus.timeRemaining / 60);
@@ -65,8 +66,14 @@ const markPrintFailure = async () => {
 </script>
 
 <template>
-	<PrinterErrorDialog
-		:printer="printer"
+	<ErrorDialog
+		:title="`${printer.name} System Errors`"
+		:errors="printer.systemStatus.errors"
+		v-model:open="showSystemErrorDialog"
+	/>
+	<ErrorDialog
+		:title="`${printer.name} Printer Errors`"
+		:errors="printer.printerStatus.errors"
 		v-model:open="showPrinterErrorDialog"
 	/>
 	<Card>
@@ -105,6 +112,7 @@ const markPrintFailure = async () => {
 							</Badge>
 							<Badge
 								variant="destructive"
+								class="cursor-pointer"
 								v-if="printer.printerStatus.errors.length > 0"
 								@click="showPrinterErrorDialog = true"
 							>
@@ -114,7 +122,9 @@ const markPrintFailure = async () => {
 							</Badge>
 							<Badge
 								variant="destructive"
+								class="cursor-pointer"
 								v-if="printer.systemStatus.errors.length > 0"
+								@click="showSystemErrorDialog = true"
 							>
 								{{ printer.systemStatus.errors.length }} System Error{{
 									printer.systemStatus.errors.length > 1 ? "s" : ""
