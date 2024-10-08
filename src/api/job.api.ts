@@ -28,6 +28,25 @@ export async function getJobHistory(
 	).then((response) => response.json());
 }
 
+export async function setJobPriority(
+	jobId: number,
+	priority: number,
+): Promise<void> {
+	await fetch(`/api/jobs/${jobId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ priority }),
+	});
+}
+
+export async function deleteJob(jobId: number): Promise<void> {
+	await fetch(`/api/jobs/${jobId}`, {
+		method: "DELETE",
+	});
+}
+
 export interface JobPreviewResponse {
 	jobs: JobPreview[];
 	count: number;

@@ -41,7 +41,36 @@ const fetchJobs = async () => {
 
 const changePage = (page: number) => {
 	jobStore.value.page = page - 1;
-	fetchJobs();
+	jobStore.value.isLoading = true;
+	fetchJobs().finally(() => {
+		jobStore.value.isLoading = false;
+	});
+};
+
+const setJobPriority = async (jobId: number, priority: number) => {
+	await JobApi.setJobPriority(jobId, priority)
+		.then(() => {
+			jobStore.value.isLoading = true;
+			fetchJobs().finally(() => {
+				jobStore.value.isLoading = false;
+			});
+		})
+		.catch((error) => {
+			jobStore.value.error = (error as Error).message;
+		});
+};
+
+const cancelJob = async (jobId: number) => {
+	await JobApi.deleteJob(jobId)
+		.then(() => {
+			jobStore.value.isLoading = true;
+			fetchJobs().finally(() => {
+				jobStore.value.isLoading = false;
+			});
+		})
+		.catch((error) => {
+			jobStore.value.error = (error as Error).message;
+		});
 };
 
 onMounted(() => {
@@ -72,6 +101,8 @@ onMounted(() => {
 				:key="job.id"
 				:job="job"
 				class="w-full"
+				@setPriority="setJobPriority(job.id, $event)"
+				@cancel="cancelJob(job.id)"
 			/>
 			<div
 				v-if="jobStore.jobs.length === 0"
