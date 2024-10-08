@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { PrinterPreview } from "@/api/printer.api";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -12,7 +11,11 @@ import {
 import { defineModel } from "vue";
 
 defineProps<{
-	printer: PrinterPreview;
+	errors: {
+		name: string;
+		message: string;
+	}[];
+	title: string;
 }>();
 
 const open = defineModel("open", {
@@ -25,14 +28,11 @@ const open = defineModel("open", {
 	<AlertDialog v-model:open="open" class="absolute">
 		<AlertDialogContent>
 			<AlertDialogHeader>
-				<AlertDialogTitle>{{ printer.name }} Printer Errors</AlertDialogTitle>
+				<AlertDialogTitle>{{ title }}</AlertDialogTitle>
 				<AlertDialogDescription>
 					<div class="flex flex-col gap-2">
-						<div
-							class="rounded-lg bg-card p-2 border"
-							v-for="error in printer.printerStatus.errors"
-						>
-							<p class="text-destructive font-semibold">{{ error.name }}</p>
+						<div class="rounded-lg bg-card p-2 border" v-for="error in errors">
+							<p class="font-semibold">{{ error.name }}</p>
 							<p>{{ error.message }}</p>
 						</div>
 					</div>
