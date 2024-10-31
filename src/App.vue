@@ -6,6 +6,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { VueQueryDevtools } from "@tanstack/vue-query-devtools";
 
 const VERSION = import.meta.env.VITE_OP_VERSION;
 const VERSION_DATE = import.meta.env.VITE_OP_VERSION_DATE;
@@ -44,4 +45,5 @@ const VERSION_DATE = import.meta.env.VITE_OP_VERSION_DATE;
 			<RouterView />
 		</div>
 	</div>
+	<VueQueryDevtools />
 </template>

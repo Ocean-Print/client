@@ -2,15 +2,7 @@
 import Button from "./ui/button/Button.vue";
 import Progress from "./ui/progress/Progress.vue";
 import type { PrinterPreview } from "@/api/printer.api";
-import ErrorDialog from "@/components/ErrorDialog.vue";
 import { Badge } from "@/components/ui/badge";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Icon } from "@iconify/vue";
 import { ref, computed, defineEmits } from "vue";
 
@@ -18,10 +10,7 @@ const { printer } = defineProps<{
 	printer: PrinterPreview;
 }>();
 
-const emits = defineEmits(["clearPrinter"]);
-
-const showPrinterErrorDialog = ref(false);
-const showSystemErrorDialog = ref(false);
+const emit = defineEmits(["openErrorDialog", "openUpdateDialog"]);
 
 const timeRemaining = computed(() => {
 	const hours = Math.floor(printer.printerStatus.timeRemaining / 60);
@@ -53,124 +42,93 @@ const message = computed(() => {
 	if (printer.systemStatus.state === "DISPATCHING")
 		return "Dispatching a print";
 	if (printer.systemStatus.isClear) return "Waiting for print";
-	return "Seeking Clarity";
+	return "Seeking clarity";
 });
 
-const markPrintSucceeded = async () => {
-	emits("clearPrinter", printer.id, true);
-};
+const showTimeRemaining = computed(() => {
+	return printer.printerStatus.state === "PRINTING";
+});
 
-const markPrintFailure = async () => {
-	emits("clearPrinter", printer.id, false);
-};
+const showProgressPercentage = computed(() => {
+	return (
+		printer.printerStatus.state === "PRINTING" ||
+		printer.systemStatus.state === "DISPATCHING"
+	);
+});
+
+const showUpdateButton = computed(() => {
+	return (
+		["IDLE", "FINISHED"].includes(printer.printerStatus.state) &&
+		!printer.systemStatus.isClear
+	);
+});
+
+const errorCount = computed(() => {
+	return (
+		printer.systemStatus.errors.length + printer.printerStatus.errors.length
+	);
+});
 </script>
 
 <template>
-	<ErrorDialog
-		:title="`${printer.name} System Errors`"
-		:errors="printer.systemStatus.errors"
-		v-model:open="showSystemErrorDialog"
-	/>
-	<ErrorDialog
-		:title="`${printer.name} Printer Errors`"
-		:errors="printer.printerStatus.errors"
-		v-model:open="showPrinterErrorDialog"
-	/>
-	<Card>
-		<CardHeader>
-			<CardTitle>{{ printer.name }}</CardTitle>
-		</CardHeader>
-		<CardContent>
-			<div class="flex flex-col gap-4">
-				<!-- Printer Current Job -->
-				<div class="flex flex-row gap-2 items-center">
-					<img
-						:src="`/assets/thumbnails/${printer.currentJob.project.hash}.png`"
-						class="w-16 h-16"
-						v-if="printer.currentJob"
-					/>
-					<div
-						class="w-16 h-16 p-4"
-						v-else-if="printer.systemStatus.state === 'DISPATCHING'"
-					>
-						<Icon icon="fa-solid:paper-plane" class="w-full h-full" />
-					</div>
-					<div
-						class="w-16 h-16 p-4"
-						v-else-if="printer.printerStatus.state === 'IDLE'"
-					>
-						<Icon icon="fa-solid:clock" class="w-full h-full" />
-					</div>
-					<div class="w-16 h-16 p-4" v-else>
-						<Icon icon="fa-solid:crow" class="w-full h-full" />
-					</div>
-					<div class="flex flex-col gap-2">
-						<span class="text-xl h-8 w-full truncate">{{ message }}</span>
-						<div class="flex flex-row gap-2 h-8">
-							<Badge variant="outline">
-								{{ printer.printerStatus.state }}
-							</Badge>
-							<Badge
-								variant="destructive"
-								class="cursor-pointer"
-								v-if="printer.printerStatus.errors.length > 0"
-								@click="showPrinterErrorDialog = true"
-							>
-								{{ printer.printerStatus.errors.length }} Printer Error{{
-									printer.printerStatus.errors.length > 1 ? "s" : ""
-								}}
-							</Badge>
-							<Badge
-								variant="destructive"
-								class="cursor-pointer"
-								v-if="printer.systemStatus.errors.length > 0"
-								@click="showSystemErrorDialog = true"
-							>
-								{{ printer.systemStatus.errors.length }} System Error{{
-									printer.systemStatus.errors.length > 1 ? "s" : ""
-								}}
-							</Badge>
-						</div>
+	<div class="flex flex-col gap-1">
+		<div class="flex flex-row gap-4 items-center justify-between">
+			<span class="font-bold">{{ printer.name }}</span>
+			<Badge
+				variant="destructive"
+				@click="emit('openErrorDialog')"
+				v-if="errorCount > 0"
+				class="cursor-pointer"
+			>
+				{{ errorCount }} Error{{ errorCount !== 1 ? "s" : "" }}
+			</Badge>
+			<Badge variant="outline" v-else>{{ printer.printerStatus.state }}</Badge>
+		</div>
+		<div class="flex flex-col gap-1 border rounded p-2">
+			<div class="flex flex-row gap-1">
+				<img
+					:src="`/assets/thumbnails/${printer.currentJob.project.hash}.png`"
+					class="w-16 h-16"
+					v-if="printer.currentJob"
+				/>
+				<div
+					class="w-16 h-16 p-4"
+					v-else-if="printer.systemStatus.state === 'DISPATCHING'"
+				>
+					<Icon icon="fa-solid:paper-plane" class="w-full h-full" />
+				</div>
+				<div
+					class="w-16 h-16 p-4"
+					v-else-if="printer.printerStatus.state === 'IDLE'"
+				>
+					<Icon icon="fa-solid:clock" class="w-full h-full" />
+				</div>
+				<div class="w-16 h-16 p-4" v-else>
+					<Icon icon="fa-solid:crow" class="w-full h-full" />
+				</div>
+				<div class="flex flex-col gap-2 justify-center">
+					<span>{{ message }}</span>
+					<div class="flex flex-row gap-1" v-if="printer.currentJob">
+						<Badge variant="outline">{{
+							printer.currentJob?.project.user.name
+						}}</Badge>
 					</div>
 				</div>
-				<!-- Active Printer Progress Bar -->
-				<div class="flex flex-row gap-2 items-center">
-					<Badge
-						variant="outline"
-						v-if="['PRINTING', 'PAUSED'].includes(printer.printerStatus.state)"
-						>{{ progress.toFixed(0) }}%</Badge
-					>
-					<Progress :model-value="progress" />
-					<Badge
-						variant="outline"
-						v-if="['PRINTING', 'PAUSED'].includes(printer.printerStatus.state)"
-						>{{ timeRemaining }}</Badge
-					>
-				</div>
 			</div>
-		</CardContent>
-		<CardFooter>
-			<div class="flex flex-row gap-2 items-center">
-				<Button
-					v-if="
-						['IDLE', 'FINISHED'].includes(printer.printerStatus.state) &&
-						!printer.systemStatus.isClear
-					"
-					@click="markPrintSucceeded"
-				>
-					Print Succeeded
-				</Button>
-				<Button
-					variant="outline"
-					v-if="
-						['IDLE', 'FINISHED'].includes(printer.printerStatus.state) &&
-						!printer.systemStatus.isClear
-					"
-					@click="markPrintFailure"
-				>
-					Print Failed
+			<div v-if="showUpdateButton">
+				<Button class="w-full" @click="emit('openUpdateDialog')">
+					Clear Printer
 				</Button>
 			</div>
-		</CardFooter>
-	</Card>
+			<div class="flex flex-row justify-between items-center gap-1 h-10" v-else>
+				<Badge variant="outline" v-if="showProgressPercentage"
+					>{{ printer.printerStatus.progress * 100 }}%</Badge
+				>
+				<Progress v-model="progress" class="w-full" />
+				<Badge variant="outline" v-if="showTimeRemaining">{{
+					timeRemaining
+				}}</Badge>
+			</div>
+		</div>
+	</div>
 </template>
