@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
-import { ref, onMounted, computed } from "vue";
+import { ref, computed } from "vue";
 
 const toast = useToast();
 const queryClient = useQueryClient();
