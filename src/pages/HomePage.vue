@@ -22,7 +22,7 @@ const printers = useQuery({
 });
 
 const clearPrinterMutation = useMutation({
-	mutationKey: ["clear-printer"],
+	mutationKey: ["printers", "clearPrinter"],
 	mutationFn: async (options: {
 		printerId: number;
 		isSuccess: boolean;
