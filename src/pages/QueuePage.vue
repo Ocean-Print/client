@@ -25,7 +25,7 @@ const queryClient = useQueryClient();
 const page = ref(1);
 
 const jobs = useQuery({
-	queryKey: ["jobs", page],
+	queryKey: ["jobs", "queue", page],
 	queryFn: () => JobApi.getJobQueue(page.value - 1),
 	refetchInterval: 10000,
 });
@@ -36,7 +36,7 @@ const setJobPriorityMutation = useMutation({
 		await JobApi.setJobPriority(options.jobId, options.priority);
 	},
 	onSuccess: () => {
-		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		queryClient.invalidateQueries({ queryKey: ["jobs", "queue", page.value] });
 		toast.toast({
 			title: "Job Prioritized",
 			description: "Job priority has been updated",
@@ -58,7 +58,7 @@ const cancelJobMutation = useMutation({
 		await JobApi.deleteJob(jobId);
 	},
 	onSuccess: () => {
-		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		queryClient.invalidateQueries({ queryKey: ["jobs", "queue", page.value] });
 		toast.toast({
 			title: "Job Cancelled",
 			description: "Job has been cancelled",

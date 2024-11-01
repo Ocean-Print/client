@@ -24,7 +24,7 @@ const toast = useToast();
 const page = ref(1);
 
 const jobs = useQuery({
-	queryKey: ["jobs", page],
+	queryKey: ["jobs", "history", page],
 	queryFn: () => JobApi.getJobHistory(page.value - 1),
 	refetchInterval: 10000,
 });
