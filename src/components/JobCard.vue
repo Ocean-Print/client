@@ -14,7 +14,7 @@ const { job } = defineProps<{
 	job: JobPreview;
 }>();
 
-const emits = defineEmits(["cancel", "setPriority"]);
+const emits = defineEmits(["cancel", "setPriority", "reprint"]);
 
 const printTime = computed(() => {
 	const hours = Math.floor(job.project.printTime / 3600);
@@ -32,35 +32,44 @@ const printTime = computed(() => {
 			/>
 			<div class="flex flex-col gap-2 grow">
 				<span class="text-xl h-8 w-full truncate">{{ job.project.name }}</span>
-				<div class="flex flex-row gap-2 h-8">
-					<Badge :variant="job.state === 'FAILED' ? 'destructive' : 'outline'">
+				<div class="flex flex-row gap-2 h-8 items-center">
+					<Badge :variant="job.state === 'FAILED' ? 'destructive' : 'default'">
 						{{ job.state }}
+					</Badge>
+					<Badge variant="outline">
+						{{ job.project.user.name }}
 					</Badge>
 					<Badge variant="outline">
 						{{ printTime }}
 					</Badge>
 					<Badge variant="outline" v-if="job.priority > 0"> Priority </Badge>
 				</div>
-				<div class="text-neutral-500 text-sm" v-if="job.endedAt">
-					Ended at {{ new Date(job.endedAt).toLocaleString() }}
-				</div>
 			</div>
-			<DropdownMenu v-if="job.state === 'QUEUED'">
+			<DropdownMenu>
 				<DropdownMenuTrigger>
 					<Button variant="outline">Actions</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
 					<DropdownMenuItem
 						@click="emits('setPriority', 1)"
-						v-if="job.priority === 0"
+						v-if="job.state === 'QUEUED' && job.priority === 0"
 						>Prioritize</DropdownMenuItem
 					>
 					<DropdownMenuItem
 						@click="emits('setPriority', 0)"
-						v-if="job.priority > 0"
+						v-if="job.state === 'QUEUED' && job.priority > 0"
 						>Deprioritize</DropdownMenuItem
 					>
-					<DropdownMenuItem @click="emits('cancel')">Cancel</DropdownMenuItem>
+					<DropdownMenuItem
+						v-if="job.state === 'QUEUED'"
+						@click="emits('cancel')"
+						>Cancel</DropdownMenuItem
+					>
+					<DropdownMenuItem
+						v-if="job.state === 'FAILED' || job.state === 'COMPLETED'"
+						@click="emits('reprint')"
+						>Reprint</DropdownMenuItem
+					>
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
