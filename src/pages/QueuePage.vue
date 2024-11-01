@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import * as JobApi from "@/api/job.api";
-import type { JobPreview } from "@/api/job.api";
+import * as StatsApi from "@/api/stats.api";
 import JobCard from "@/components/JobCard.vue";
 import Spinner from "@/components/Spinner.vue";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Badge from "@/components/ui/badge/Badge.vue";
 import Button from "@/components/ui/button/Button.vue";
 import {
 	Pagination,
@@ -14,70 +16,60 @@ import {
 	PaginationNext,
 	PaginationPrev,
 } from "@/components/ui/pagination";
-import { ref, onMounted } from "vue";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { ref, onMounted, computed } from "vue";
 
-const jobStore = ref({
-	isLoading: false,
-	interval: null as number | null,
-	error: "",
-	count: 0,
-	page: 0,
-	jobs: [] as JobPreview[],
+const queryClient = useQueryClient();
+const page = ref(1);
+
+const jobs = useQuery({
+	queryKey: ["jobs", page],
+	queryFn: () => JobApi.getJobQueue(page.value - 1),
+	refetchInterval: 10000,
 });
 
-const fetchJobs = async () => {
-	await JobApi.getJobQueue(jobStore.value.page)
-		.then((response) => {
-			jobStore.value.count = response.count;
-			jobStore.value.jobs = response.jobs;
-		})
-		.catch((error) => {
-			jobStore.value.error = (error as Error).message;
-			jobStore.value.count = 0;
-			jobStore.value.jobs = [];
-			jobStore.value.page = 0;
-		});
-};
+const setJobPriorityMutation = useMutation({
+	mutationKey: ["jobs", "setJobPriority"],
+	mutationFn: async (options: { jobId: number; priority: number }) => {
+		await JobApi.setJobPriority(options.jobId, options.priority);
+	},
+	onSuccess: () => {
+		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+	},
+});
 
-const changePage = (page: number) => {
-	jobStore.value.page = page - 1;
-	jobStore.value.isLoading = true;
-	fetchJobs().finally(() => {
-		jobStore.value.isLoading = false;
-	});
-};
+const cancelJobMutation = useMutation({
+	mutationKey: ["jobs", "cancelJob"],
+	mutationFn: async (jobId: number) => {
+		await JobApi.deleteJob(jobId);
+	},
+	onSuccess: () => {
+		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+	},
+});
 
-const setJobPriority = async (jobId: number, priority: number) => {
-	await JobApi.setJobPriority(jobId, priority)
-		.then(() => {
-			jobStore.value.isLoading = true;
-			fetchJobs().finally(() => {
-				jobStore.value.isLoading = false;
-			});
-		})
-		.catch((error) => {
-			jobStore.value.error = (error as Error).message;
-		});
-};
+const stats = useQuery({
+	queryKey: ["stats", "queueTime"],
+	queryFn: () => StatsApi.getQueueTime(),
+	refetchInterval: 10000,
+});
 
-const cancelJob = async (jobId: number) => {
-	await JobApi.deleteJob(jobId)
-		.then(() => {
-			jobStore.value.isLoading = true;
-			fetchJobs().finally(() => {
-				jobStore.value.isLoading = false;
-			});
-		})
-		.catch((error) => {
-			jobStore.value.error = (error as Error).message;
-		});
-};
+const queueTime = computed(() => {
+	let totalMinutes = stats.data.value;
+	if (!totalMinutes) return "No queue time";
 
-onMounted(() => {
-	jobStore.value.isLoading = true;
-	fetchJobs().finally(() => {
-		jobStore.value.isLoading = false;
-	});
+	let days = Math.floor(totalMinutes / 1440);
+	totalMinutes -= days * 1440;
+	let hours = Math.floor(totalMinutes / 60);
+	totalMinutes -= hours * 60;
+	let minutes = totalMinutes;
+
+	let time = "";
+	if (days > 0) time += `${days}d `;
+	if (hours > 0) time += `${hours}h `;
+	if (minutes > 0) time += `${minutes}m`;
+	if (time === "") time = "No queue time";
+	return time;
 });
 </script>
 
@@ -85,38 +77,54 @@ onMounted(() => {
 	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
 		<div class="flex flex-row gap-4 items-center">
 			<h1 class="text-3xl font-bold">Job Queue</h1>
+			<div class="flex flex-row gap-1">
+				<Badge variant="outline" v-if="jobs.data.value"
+					>{{ jobs.data.value.count }} job{{
+						jobs.data.value.count !== 1 ? "s" : ""
+					}}</Badge
+				>
+				<Badge
+					v-if="!stats.isError.value && !stats.isPending.value"
+					variant="outline"
+					>{{ queueTime }}</Badge
+				>
+			</div>
 		</div>
 		<div
-			v-if="jobStore.isLoading"
+			v-if="jobs.isPending.value"
 			class="absolute top-0 left-0 w-full flex items-center justify-center p-2"
 		>
 			<Spinner />
 		</div>
-		<div v-else-if="jobStore.error" class="text-center text-red-500">
-			{{ jobStore.error }}
-		</div>
-		<div class="flex flex-col gap-2" v-else>
+		<Alert v-else-if="jobs.isError.value" variant="destructive">
+			<AlertTitle>Error Loading Queue</AlertTitle>
+			<AlertDescription>
+				{{ jobs.error.value?.message }}
+			</AlertDescription>
+		</Alert>
+		<div class="flex flex-col gap-2" v-else-if="jobs.data.value">
 			<JobCard
-				v-for="job in jobStore.jobs"
+				v-for="job in jobs.data.value.jobs"
 				:key="job.id"
 				:job="job"
 				class="w-full"
-				@setPriority="setJobPriority(job.id, $event)"
-				@cancel="cancelJob(job.id)"
+				@setPriority="
+					setJobPriorityMutation.mutate({ jobId: job.id, priority: $event })
+				"
+				@cancel="cancelJobMutation.mutate(job.id)"
 			/>
 			<div
-				v-if="jobStore.jobs.length === 0"
+				v-if="jobs.data.value.jobs.length === 0"
 				class="text-center text-neutral-500"
 			>
 				No jobs in the queue
 			</div>
 		</div>
 		<Pagination
-			v-if="jobStore.count > 10"
-			v-slot="{ page }"
-			:total="jobStore.count"
+			v-if="jobs.data.value && jobs.data.value.count > 0"
+			:total="jobs.data.value.count"
 			:items-per-page="10"
-			@update:page="changePage($event)"
+			v-model:page="page"
 			:sibling-count="1"
 			show-edges
 			:default-page="1"
@@ -141,7 +149,6 @@ onMounted(() => {
 					</PaginationListItem>
 					<PaginationEllipsis v-else :key="item.type" :index="index" />
 				</template>
-
 				<PaginationNext />
 				<PaginationLast />
 			</PaginationList>
