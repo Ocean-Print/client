@@ -91,7 +91,7 @@ export interface JobPreview {
 		}[];
 		user: {
 			id: number;
-			username: string;
+			name: string;
 		};
 	};
 	printer: {
