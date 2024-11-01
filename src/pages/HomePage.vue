@@ -82,7 +82,7 @@ const clearPrinter = (
 			v-if="dialogTarget"
 			:printer="dialogTarget"
 			v-model:open="showUpdateDialog"
-			@clear-printer="(s) => clearPrinter(dialogTarget.id, s)"
+			@clear-printer="(s) => dialogTarget && clearPrinter(dialogTarget.id, s)"
 		/>
 		<div class="flex flex-row gap-4 items-center justify-between">
 			<h1 class="text-3xl font-bold">Printers</h1>
