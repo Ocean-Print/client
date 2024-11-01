@@ -68,7 +68,9 @@ const clearPrinter = (
 </script>
 
 <template>
-	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+	<div
+		class="flex flex-col gap-4 p-4 w-full h-full overflow-y-scroll overflow-x-hidden"
+	>
 		<ErrorDialog
 			v-if="dialogTarget"
 			:name="dialogTarget.name"

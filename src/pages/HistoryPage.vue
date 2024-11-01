@@ -39,7 +39,9 @@ const reprintJob = async (job: JobPreview) => {
 </script>
 
 <template>
-	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+	<div
+		class="flex flex-col gap-4 p-4 w-full h-full overflow-y-scroll overflow-x-hidden"
+	>
 		<div class="flex flex-row gap-4 items-center">
 			<h1 class="text-3xl font-bold">Job History</h1>
 		</div>

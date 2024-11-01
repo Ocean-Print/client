@@ -100,7 +100,9 @@ const queueTime = computed(() => {
 </script>
 
 <template>
-	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+	<div
+		class="flex flex-col gap-4 p-4 w-full h-full overflow-y-scroll overflow-x-hidden"
+	>
 		<div class="flex flex-row gap-4 items-center">
 			<h1 class="text-3xl font-bold">Job Queue</h1>
 			<div class="flex flex-row gap-1">
