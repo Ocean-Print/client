@@ -68,7 +68,9 @@ const clearPrinter = (
 </script>
 
 <template>
-	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+	<div
+		class="flex flex-col gap-4 p-4 w-full h-full overflow-y-scroll overflow-x-hidden"
+	>
 		<ErrorDialog
 			v-if="dialogTarget"
 			:name="dialogTarget.name"
@@ -82,7 +84,7 @@ const clearPrinter = (
 			v-if="dialogTarget"
 			:printer="dialogTarget"
 			v-model:open="showUpdateDialog"
-			@clear-printer="(s) => clearPrinter(dialogTarget.id, s)"
+			@clear-printer="(s) => dialogTarget && clearPrinter(dialogTarget.id, s)"
 		/>
 		<div class="flex flex-row gap-4 items-center justify-between">
 			<h1 class="text-3xl font-bold">Printers</h1>

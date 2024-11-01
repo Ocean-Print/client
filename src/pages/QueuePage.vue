@@ -18,14 +18,14 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
-import { ref, onMounted, computed } from "vue";
+import { ref, computed } from "vue";
 
 const toast = useToast();
 const queryClient = useQueryClient();
 const page = ref(1);
 
 const jobs = useQuery({
-	queryKey: ["jobs", page],
+	queryKey: ["jobs", "queue", page],
 	queryFn: () => JobApi.getJobQueue(page.value - 1),
 	refetchInterval: 10000,
 });
@@ -36,7 +36,7 @@ const setJobPriorityMutation = useMutation({
 		await JobApi.setJobPriority(options.jobId, options.priority);
 	},
 	onSuccess: () => {
-		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		queryClient.invalidateQueries({ queryKey: ["jobs", "queue", page.value] });
 		toast.toast({
 			title: "Job Prioritized",
 			description: "Job priority has been updated",
@@ -58,7 +58,7 @@ const cancelJobMutation = useMutation({
 		await JobApi.deleteJob(jobId);
 	},
 	onSuccess: () => {
-		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		queryClient.invalidateQueries({ queryKey: ["jobs", "queue", page.value] });
 		toast.toast({
 			title: "Job Cancelled",
 			description: "Job has been cancelled",
@@ -100,7 +100,9 @@ const queueTime = computed(() => {
 </script>
 
 <template>
-	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+	<div
+		class="flex flex-col gap-4 p-4 w-full h-full overflow-y-scroll overflow-x-hidden"
+	>
 		<div class="flex flex-row gap-4 items-center">
 			<h1 class="text-3xl font-bold">Job Queue</h1>
 			<div class="flex flex-row gap-1">

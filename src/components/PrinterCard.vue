@@ -4,7 +4,7 @@ import Progress from "./ui/progress/Progress.vue";
 import type { PrinterPreview } from "@/api/printer.api";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@iconify/vue";
-import { ref, computed, defineEmits } from "vue";
+import { computed, defineEmits } from "vue";
 
 const { printer } = defineProps<{
 	printer: PrinterPreview;
@@ -122,7 +122,7 @@ const errorCount = computed(() => {
 			</div>
 			<div class="flex flex-row justify-between items-center gap-1 h-10" v-else>
 				<Badge variant="outline" v-if="showProgressPercentage"
-					>{{ printer.printerStatus.progress * 100 }}%</Badge
+					>{{ Math.round(printer.printerStatus.progress * 100) }}%</Badge
 				>
 				<Progress v-model="progress" class="w-full" />
 				<Badge variant="outline" v-if="showTimeRemaining">{{

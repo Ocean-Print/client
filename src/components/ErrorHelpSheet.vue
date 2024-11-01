@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button";
 import {
 	Sheet,
-	SheetClose,
 	SheetContent,
-	SheetDescription,
-	SheetFooter,
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
