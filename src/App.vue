@@ -42,7 +42,7 @@ const VERSION_DATE = import.meta.env.VITE_OP_VERSION_DATE;
 				<Theme />
 			</div>
 		</div>
-		<div class="flex flex-col gap-4 w-full h-full overflow-scroll">
+		<div class="flex flex-col gap-4 w-full h-full overflow-hidden">
 			<RouterView v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
 					<component :is="Component" />
