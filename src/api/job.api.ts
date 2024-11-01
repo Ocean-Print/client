@@ -47,6 +47,24 @@ export async function deleteJob(jobId: number): Promise<void> {
 	});
 }
 
+export async function printReceipt(jobId: number): Promise<void> {
+	await fetch(`/api/jobs/${jobId}/_receipt`, {
+		method: "POST",
+	});
+}
+
+export async function reprintJob(job: JobPreview): Promise<void> {
+	await fetch(`/api/jobs`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			projectId: job.project.id,
+		}),
+	});
+}
+
 export interface JobPreviewResponse {
 	jobs: JobPreview[];
 	count: number;

@@ -1,7 +1,7 @@
 {
 	"name": "@ocean-print/client",
 	"private": true,
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -9,6 +9,8 @@
 		"format": "prettier --write ."
 	},
 	"dependencies": {
+		"@tanstack/vue-query": "^5.59.16",
+		"@tanstack/vue-query-devtools": "^5.59.16",
 		"@tanstack/vue-table": "^8.20.5",
 		"@vueuse/core": "^11.1.0",
 		"class-variance-authority": "^0.7.0",

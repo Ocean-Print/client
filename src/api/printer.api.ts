@@ -57,14 +57,16 @@ export async function updatePrinter(
 
 export async function clearPrinter(
 	id: number,
-	body: any,
+	isSuccess: boolean,
 ): Promise<PrinterDetail> {
 	return await fetch(`/api/printers/${id}/_clear`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify(body),
+		body: JSON.stringify({
+			isSuccess: isSuccess,
+		}),
 	})
 		.then((response) => response.json())
 		.then((data) => {
@@ -97,6 +99,7 @@ export interface PrinterPreview {
 		type: string;
 		color: string;
 	}[];
+	camera?: string;
 	currentJob: {
 		id: number;
 		project: {
@@ -137,6 +140,7 @@ export interface PrinterDetail {
 		serial: string;
 		accessCode: string;
 	};
+	camera?: string;
 	currentJob: {
 		id: number;
 		createdAt: string;
