@@ -68,22 +68,22 @@ const clearPrinter = (
 </script>
 
 <template>
-	<ErrorDialog
-		v-if="dialogTarget"
-		:name="dialogTarget.name"
-		:data="[
-			{ title: 'System', errors: dialogTarget.systemStatus.errors },
-			{ title: 'Printer', errors: dialogTarget.printerStatus.errors },
-		]"
-		v-model:open="showErrorDialog"
-	/>
-	<UpdateDialog
-		v-if="dialogTarget"
-		:printer="dialogTarget"
-		v-model:open="showUpdateDialog"
-		@clear-printer="(s) => clearPrinter(dialogTarget.id, s)"
-	/>
 	<div class="flex flex-col gap-4 p-4 w-full h-full overflow-scroll">
+		<ErrorDialog
+			v-if="dialogTarget"
+			:name="dialogTarget.name"
+			:data="[
+				{ title: 'System', errors: dialogTarget.systemStatus.errors },
+				{ title: 'Printer', errors: dialogTarget.printerStatus.errors },
+			]"
+			v-model:open="showErrorDialog"
+		/>
+		<UpdateDialog
+			v-if="dialogTarget"
+			:printer="dialogTarget"
+			v-model:open="showUpdateDialog"
+			@clear-printer="(s) => clearPrinter(dialogTarget.id, s)"
+		/>
 		<div class="flex flex-row gap-4 items-center justify-between">
 			<h1 class="text-3xl font-bold">Printers</h1>
 			<ToggleGroup v-model="viewMode" type="single" size="sm" variant="outline">
