@@ -15,8 +15,11 @@ import {
 	PaginationNext,
 	PaginationPrev,
 } from "@/components/ui/pagination";
+import { useToast } from "@/components/ui/toast";
 import { useQuery } from "@tanstack/vue-query";
 import { ref } from "vue";
+
+const toast = useToast();
 
 const page = ref(1);
 
@@ -28,6 +31,10 @@ const jobs = useQuery({
 
 const reprintJob = async (job: JobPreview) => {
 	await JobApi.reprintJob(job);
+	toast.toast({
+		title: "Job Reprinted",
+		description: "Job reprint has been added to the queue",
+	});
 };
 </script>
 

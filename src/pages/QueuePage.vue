@@ -16,9 +16,11 @@ import {
 	PaginationNext,
 	PaginationPrev,
 } from "@/components/ui/pagination";
+import { useToast } from "@/components/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { ref, onMounted, computed } from "vue";
 
+const toast = useToast();
 const queryClient = useQueryClient();
 const page = ref(1);
 
@@ -35,6 +37,18 @@ const setJobPriorityMutation = useMutation({
 	},
 	onSuccess: () => {
 		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		toast.toast({
+			title: "Job Prioritized",
+			description: "Job priority has been updated",
+		});
+	},
+	onError: (error) => {
+		console.error(error);
+		toast.toast({
+			title: "Error Updating Priority",
+			description: "An error occurred while updating the job priority",
+			variant: "destructive",
+		});
 	},
 });
 
@@ -45,6 +59,18 @@ const cancelJobMutation = useMutation({
 	},
 	onSuccess: () => {
 		queryClient.invalidateQueries({ queryKey: ["jobs", page.value] });
+		toast.toast({
+			title: "Job Cancelled",
+			description: "Job has been cancelled",
+		});
+	},
+	onError: (error) => {
+		console.error(error);
+		toast.toast({
+			title: "Error Cancelling Job",
+			description: "An error occurred while cancelling the job",
+			variant: "destructive",
+		});
 	},
 });
 
