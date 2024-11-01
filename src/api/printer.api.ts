@@ -106,6 +106,10 @@ export interface PrinterPreview {
 			id: number;
 			name: string;
 			hash: string;
+			user: {
+				id: number;
+				name: string;
+			};
 		};
 	} | null;
 }
@@ -152,6 +156,11 @@ export interface PrinterDetail {
 			hash: string;
 			printTime: number;
 			printerModel: string;
+			user: {
+				id: number;
+				name: string;
+				email: string;
+			};
 		};
 	};
 }
